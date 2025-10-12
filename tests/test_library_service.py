@@ -56,13 +56,14 @@ def test_borrow_book_invalid_format():
 
 def test_return_book_not_implemented():
     success, message = library_service.return_book_by_patron("123456", 1)
+    # If there is no active borrow record for book 1, function should return False
     assert success is False
-    assert "not yet implemented" in message
+    assert "No active borrow record" in message
 
 def test_return_book_invalid_patron():
     success, message = library_service.return_book_by_patron("12", 1)
     assert success is False
-    assert "not yet implemented" in message  # still the stub
+    assert "Invalid patron ID" in message  # invalid patron id handled
 
 # ------------------------
 # R4: Late Fee (stub)
@@ -70,11 +71,15 @@ def test_return_book_invalid_patron():
 
 def test_late_fee_not_implemented():
     result = library_service.calculate_late_fee_for_book("123456", 1)
-    assert result is None or "not implemented" in str(result).lower()
+    # For no active borrow, function returns a dict indicating no active borrow
+    assert isinstance(result, dict)
+    assert set(["fee_amount", "days_overdue", "status"]).issubset(result.keys())
 
 def test_late_fee_invalid_book():
     result = library_service.calculate_late_fee_for_book("123456", 9999)
-    assert result is None or "not implemented" in str(result).lower()
+    # For invalid book id, expect a dict indicating no active borrow
+    assert isinstance(result, dict)
+    assert result.get("status") == "No active borrow record found"
 
 # ------------------------
 # R5: Search Books
@@ -117,7 +122,10 @@ def test_catalog_list_returns_something():
 
 def test_patron_status_report_not_implemented():
     result = library_service.get_patron_status_report("123456")
-    assert result == {}
+    # Patron 123456 has sample data (one borrowed book), so expect non-empty report
+    assert isinstance(result, dict)
+    assert result.get("patron_id") == "123456"
+    assert isinstance(result.get("currently_borrowed"), list)
 
 def test_patron_status_report_invalid_id():
     result = library_service.get_patron_status_report("12")

@@ -188,14 +188,15 @@ def update_borrow_record_return_date(patron_id: str, book_id: int, return_date: 
     """Update the return date for a borrow record."""
     conn = get_db_connection()
     try:
-        conn.execute('''
+        cur = conn.execute('''
             UPDATE borrow_records 
             SET return_date = ? 
             WHERE patron_id = ? AND book_id = ? AND return_date IS NULL
         ''', (return_date.isoformat(), patron_id, book_id))
         conn.commit()
+        rows = cur.rowcount
         conn.close()
-        return True
+        return rows > 0
     except Exception as e:
         conn.close()
         return False
