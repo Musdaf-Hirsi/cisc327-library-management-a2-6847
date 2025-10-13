@@ -1,79 +1,33 @@
 # CISC327 Assignment 2 — Library Management System
 
-This repository contains the implementation for the Library Management System (Assignment 2).
+**Repository:** [https://github.com/Musdaf-Hirsi/cisc327-library-management-a2-6847](https://github.com/Musdaf-Hirsi/cisc327-library-management-a2-6847)
 
-## What is included
-- `library_service.py` — business logic functions
-- `database.py` — simple SQLite helpers and sample data
-- `tests/` — pytest test suite provided by the instructor and augmented as needed
+[![Tests](https://github.com/Musdaf-Hirsi/cisc327-library-management-a2-6847/actions/workflows/python-app.yml/badge.svg)](https://github.com/Musdaf-Hirsi/cisc327-library-management-a2-6847/actions)
 
-## Run tests locally
-1. Create and activate a virtual environment (recommended):
+This repository contains my completed implementation for **Assignment 2: Library Management System** in **CISC 327 (Software Quality Assurance)**.
+
+---
+
+## Project Structure
+
+- `library_service.py` – main business logic (R1–R7)
+- `database.py` – SQLite helper functions and sample data
+- `tests/` – pytest test suite (instructor + added cases)
+- `.github/workflows/python-app.yml` – CI workflow for automated testing
+- `requirements.txt` – dependencies
+
+---
+
+## ▶Run Tests Locally
+
 ```bash
+# 1. Create and activate the virtual environment
 python3 -m venv .a2env
 source .a2env/bin/activate
+
+# 2. Install dependencies
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-```
-2. Run the test suite:
-```bash
+
+# 3. Run all tests
 python -m pytest -q
-```
-
-## CI
-A GitHub Actions workflow is included at `.github/workflows/pytest.yml` that runs the test suite on push/PR to `main`.
-
-## Notes for the grader
-- Primary source files: `library_service.py`, `database.py`.
-- Tests were developed to follow the assignment specification.
-# Library Management System - Flask Web Application with SQLite
-
-## Overview
-
-This project contains a partial implementation of a Flask-based Library Management System with SQLite database, designed for CISC 327 (Software Quality Assurance) coursework.
-
-Students are provided with:
-
-- [`requirements_specification.md`](requirements_specification.md): Complete requirements document with 7 functional requirements (R1-R7)
-- [`app.py`](app.py): Main Flask application with application factory pattern
-- [`routes/`](routes/): Modular Flask blueprints for different functionalities
-  - [`catalog_routes.py`](routes/catalog_routes.py): Book catalog display and management routes
-  - [`borrowing_routes.py`](routes/borrowing_routes.py): Book borrowing and return routes
-  - [`api_routes.py`](routes/api_routes.py): JSON API endpoints for late fees and search
-  - [`search_routes.py`](routes/search_routes.py): Book search functionality routes
-- [`database.py`](database.py): Database operations and SQLite functions
-- [`library_service.py`](library_service.py): **Business logic functions** (your main testing focus)
-- [`templates/`](templates/): HTML templates for the web interface
-- [`requirements.txt`](requirements.txt): Python dependencies
-
-## ❗ Known Issues
-The implemented functions may contain intentional bugs. Students should discover these through unit testing (to be covered in later assignments).
-
-## Database Schema
-**Books Table:**
-- `id` (INTEGER PRIMARY KEY)
-- `title` (TEXT NOT NULL)
-- `author` (TEXT NOT NULL)  
-- `isbn` (TEXT UNIQUE NOT NULL)
-- `total_copies` (INTEGER NOT NULL)
-- `available_copies` (INTEGER NOT NULL)
-
-**Borrow Records Table:**
-- `id` (INTEGER PRIMARY KEY)
-- `patron_id` (TEXT NOT NULL)
-- `book_id` (INTEGER FOREIGN KEY)
-- `borrow_date` (TEXT NOT NULL)
-- `due_date` (TEXT NOT NULL)
-- `return_date` (TEXT NULL)
-
-## Assignment Instructions
-See [`student_instructions.md`](student_instructions.md) for complete assignment details.
-
-**Resources for students:**
-
-- [Flask Documentation](https://flask.palletsprojects.com/)
-- [Test Driven Development](https://www.datacamp.com/tutorial/test-driven-development-in-python)
-- [Pytest framework](https://realpython.com/pytest-python-testing/)
-- [Python Blueprint](https://flask.palletsprojects.com/en/stable/blueprints)
-
-
