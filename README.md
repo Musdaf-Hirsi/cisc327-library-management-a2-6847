@@ -1,3 +1,31 @@
+# CISC327 Assignment 2 — Library Management System
+
+This repository contains the implementation for the Library Management System (Assignment 2).
+
+## What is included
+- `library_service.py` — business logic functions
+- `database.py` — simple SQLite helpers and sample data
+- `tests/` — pytest test suite provided by the instructor and augmented as needed
+
+## Run tests locally
+1. Create and activate a virtual environment (recommended):
+```bash
+python3 -m venv .a2env
+source .a2env/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
+2. Run the test suite:
+```bash
+python -m pytest -q
+```
+
+## CI
+A GitHub Actions workflow is included at `.github/workflows/pytest.yml` that runs the test suite on push/PR to `main`.
+
+## Notes for the grader
+- Primary source files: `library_service.py`, `database.py`.
+- Tests were developed to follow the assignment specification.
 # Library Management System - Flask Web Application with SQLite
 
 ## Overview
