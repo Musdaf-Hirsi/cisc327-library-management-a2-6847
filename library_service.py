@@ -15,7 +15,7 @@ from database import (
 def _as_date(d):
     if d is None:
         return None
-    if isinstance(d, date):
+    if isinstance(d, date):          # or datetime.date if you used Option B
         return d
     if isinstance(d, str):
         # try ISO first
@@ -29,6 +29,7 @@ def _as_date(d):
         except ValueError:
             return None
     return None
+
 
 def add_book_to_catalog(title: str, author: str, isbn: str, total_copies: int) -> Tuple[bool, str]:
     """
