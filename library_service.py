@@ -3,7 +3,8 @@ Library Service Module - Business Logic Functions
 Contains all the core business logic for the Library Management System
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+
 from typing import Dict, List, Optional, Tuple
 from database import (
     get_book_by_id, get_book_by_isbn, get_patron_borrow_count,
