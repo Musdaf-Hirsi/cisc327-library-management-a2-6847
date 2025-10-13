@@ -12,6 +12,24 @@ from database import (
     update_borrow_record_return_date, get_all_books
 )
 
+def _as_date(d):
+    if d is None:
+        return None
+    if isinstance(d, date):
+        return d
+    if isinstance(d, str):
+        # try ISO first
+        try:
+            return datetime.fromisoformat(d).date()
+        except ValueError:
+            pass
+        # fallback: YYYY-MM-DD
+        try:
+            return datetime.strptime(d, "%Y-%m-%d").date()
+        except ValueError:
+            return None
+    return None
+
 def add_book_to_catalog(title: str, author: str, isbn: str, total_copies: int) -> Tuple[bool, str]:
     """
     Add a new book to the catalog. (R1)
@@ -98,12 +116,14 @@ def calculate_late_fee_for_book(patron_id: str, book_id: int) -> Dict:
     if not record:
         return {"fee_amount": 0.0, "days_overdue": 0, "status": "No active borrow record found"}
 
-    due = record.get('due_date')
+    due_raw = record.get('due_date')
+    due = _as_date(due_raw)
     if not due:
-        return {"fee_amount": 0.0, "days_overdue": 0, "status": "No due date available"}
+     return {"fee_amount": 0.0, "days_overdue": 0, "status": "No due date available"}
 
-    now = datetime.now()
-    days_overdue = (now.date() - due.date()).days
+    today = datetime.now().date()
+    days_overdue = (today - due).days
+
     if days_overdue <= 0:
         return {"fee_amount": 0.0, "days_overdue": 0, "status": "OK"}
 
