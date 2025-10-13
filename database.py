@@ -186,17 +186,21 @@ def update_book_availability(book_id: int, change: int) -> bool:
 
 def update_borrow_record_return_date(patron_id: str, book_id: int, return_date: datetime) -> bool:
     """Update the return date for a borrow record."""
-    conn = get_db_connection()
     try:
-        cur = conn.execute('''
-            UPDATE borrow_records 
-            SET return_date = ? 
-            WHERE patron_id = ? AND book_id = ? AND return_date IS NULL
-        ''', (return_date.isoformat(), patron_id, book_id))
-        conn.commit()
-        rows = cur.rowcount
-        conn.close()
-        return rows > 0
-    except Exception as e:
-        conn.close()
+        conn = get_db_connection()
+        with conn:
+            cur = conn.execute(
+                '''
+                UPDATE borrow_records
+                SET return_date = ?
+                WHERE patron_id = ? AND book_id = ? AND return_date IS NULL
+                ''',
+                (return_date.isoformat(), patron_id, book_id)
+            )
+            return cur.rowcount > 0
+    except Exception:
+        try:
+            conn.close()
+        except Exception:
+            pass
         return False
