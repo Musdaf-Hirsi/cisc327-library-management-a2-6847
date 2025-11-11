@@ -1,9 +1,5 @@
 # Assignment 3 Report  
 Course: CISC 327 – Software Quality Assurance  
-Student: Musdaf Hirsi  
-Student ID: 20376847  
-Date: (Insert submission date)
-
 ---
 
 ## 1. Student Information
@@ -12,9 +8,10 @@ Date: (Insert submission date)
 - Course: CISC 327  
 - Assignment: A3 — Automated Testing with Stubs, Mocks, and Coverage  
 
+
 ---
 
-## 2. Stubbing vs. Mocking (≈250–300 words)
+## 2. Stubbing vs. Mocking 
 
 In this assignment, the objective was to validate the behavior of two payment-related functions using automated unit testing with both stubs and mocks. The functions under test were `pay_late_fees()` and `refund_late_fee_payment()` in `services/library_service.py`. These functions depend on database lookup helpers and an external payment gateway, making them good use cases for controlled substitution using stubs and mocks.
 
@@ -83,7 +80,7 @@ Date: (Insert submission date)
 
 ---
 
-## 2. Stubbing vs. Mocking (≈250–300 words)
+## 2. Stubbing vs. Mocking 
 
 In this assignment, the objective was to validate the behavior of two payment-related functions using automated unit testing with both stubs and mocks. The functions under test were `pay_late_fees()` and `refund_late_fee_payment()` in `services/library_service.py`. These functions depend on local database helpers and an external payment gateway, which made them good targets for controlled substitution techniques.
 
