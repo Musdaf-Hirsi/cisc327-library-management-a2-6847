@@ -38,84 +38,9 @@ pytest --cov=services --cov-report=term
 Generate HTML coverage report
 pytest --cov=services --cov-report=html
 xdg-open htmlcov/index.html
-
-| Test File                        | Scenario                 | Stub Used | Mock Used | Expected Result          |
-| -------------------------------- | ------------------------ | --------- | --------- | ------------------------ |
-| test_payment_mock_stub.py        | pay_late_fees success    | yes       | yes       | success + transaction ID |
-| test_payment_mock_stub.py        | declined payment         | yes       | yes       | failure                  |
-| test_payment_mock_stub.py        | invalid patron           | yes       | no        | failure, no call         |
-| test_payment_mock_stub.py        | zero fee                 | yes       | no        | failure, no call         |
-| test_payment_mock_stub.py        | gateway exception        | yes       | yes       | failure                  |
-| test_payment_mock_stub.py        | refund success           | no        | yes       | success + refund ID      |
-| test_payment_mock_stub.py        | refund invalid tx        | no        | no        | failure                  |
-| test_payment_mock_stub.py        | refund invalid amount    | no        | no        | failure                  |
-| test_payment_mock_stub.py        | refund rejected          | no        | yes       | failure                  |
-| test_library_service.py          | add_book validation      | yes       | no        | validation error         |
-| test_library_service.py          | borrow failure modes     | yes       | no        | error                    |
-| test_library_service.py          | borrow success           | yes       | no        | success                  |
-| test_library_service.py          | return failure modes     | yes       | no        | error                    |
-| test_library_service.py          | return success           | no        | no        | success                  |
-| test_library_service.py          | calculate fee edge cases | yes       | no        | fast results             |
-| test_library_service_behavior.py | catalog, search          | yes       | no        | match                    |
-| test_services_coverage.py        | sanity coverage          | no        | no        | included                 |
-
-5. Coverage Analysis
-
-Final coverage results:
-
-File	Coverage
-# Assignment 3 Report
-Course: CISC 327 – Software Quality Assurance
-Student: Musdaf Hirsi
-Student ID: 20376847
-Date: (Insert submission date)
-
----
-
-## 1. Student Information
-- Name: Musdaf Hirsi
-- Student ID: 20376847
-- Course: CISC 327 – Software Quality Assurance
-- Assignment: A3 — Automated Testing with Stubs, Mocks, and Coverage
-
----
-
-## 2. Stubbing vs. Mocking 
-
-In this assignment, the objective was to validate the behavior of two payment-related functions using automated unit testing with both stubs and mocks. The functions under test were `pay_late_fees()` and `refund_late_fee_payment()` in `services/library_service.py`. These functions depend on local database helpers and an external payment gateway, which made them good targets for controlled substitution techniques.
-
-Stubbing replaces real logic with predictable canned responses. Stubs are appropriate when only the output matters and not the internal call behavior. Here, I stubbed `calculate_late_fee_for_book()` and `get_book_by_id()` to simulate fee and lookup behavior without interacting with the database. These stubs allowed me to force scenarios such as overdue books, zero fee owed, invalid patron IDs, and missing borrow records. Using stubs ensured that all test scenarios remained deterministic, fast, and isolated.
-
-Mocking is used when we want to verify how a dependency is invoked. I mocked the external `PaymentGateway` to confirm that its methods were called correctly. This included checking that `process_payment()` and `refund_payment()` were called with the right parameters in valid cases, and verifying they were not called when conditions prevented a payment. I used `Mock(spec=PaymentGateway)` so only valid methods could be invoked. I verified call behavior using `assert_called_once_with()` and `assert_not_called()` assertions.
-
-Combining stubs and mocks provided confidence that each payment scenario behaved correctly while still allowing full test automation with no external API or database interaction. This aligns well with unit-testing best practices.
-
----
-
-## 3. How to Run Tests
-
-### Install dependencies
-```bash
-python -m pip install -U pytest pytest-mock pytest-cov
 ```
 
-Run all tests
-```bash
-pytest -q
-```
-
-Run tests with coverage (terminal)
-```bash
-pytest --cov=services --cov-report=term
-```
-
-Generate HTML coverage report
-```bash
-pytest --cov=services --cov-report=html
-xdg-open htmlcov/index.html
-```
-
-4. Test Case Summary Table
+## 4. Test Case Summary Table
 
 | Test File | Scenario | Stub Used | Mock Used | Expected Result |
 |---|---:|---:|---:|---|
