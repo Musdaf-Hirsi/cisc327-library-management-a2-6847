@@ -1,4 +1,7 @@
 Flask==2.3.3
 pytest==7.4.2
+# use a released pytest-mock compatible with current pip indexes
+pytest-mock==3.15.1
+pytest-cov==4.1.0
 
 # no other external dependencies required for core assignment

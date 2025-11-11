@@ -1,16 +1,10 @@
 """
-Compatibility shim at project root to preserve existing imports.
-This simply re-exports the services implementation so existing code/tests keep working.
-"""
-
-from services.library_service import *  # noqa: F401,F403
-"""
-Library Service Module - Business Logic Functions
-Contains all the core business logic for the Library Management System
+Services-layer Library Service - copy of business logic adapted for services package.
+Includes payment-related functions to be tested with mocks/stubs.
 """
 
 from datetime import datetime, timedelta, date
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from database import (
     get_book_by_id, get_book_by_isbn, get_patron_borrow_count,
     get_patron_borrowed_books,
@@ -18,28 +12,24 @@ from database import (
     update_borrow_record_return_date, get_all_books
 )
 
+
 def _as_date(d):
     if d is None:
         return None
+    # Accept date or datetime objects directly
     if isinstance(d, date):
         return d
+    if isinstance(d, datetime):
+        return d.date()
     if isinstance(d, str):
-        # try ISO first
         try:
             return datetime.fromisoformat(d).date()
         except ValueError:
             pass
-        # fallback: YYYY-MM-DD
-        try:
-            return datetime.strptime(d, "%Y-%m-%d").date()
-        except ValueError:
-            return None
     return None
 
+
 def add_book_to_catalog(title: str, author: str, isbn: str, total_copies: int) -> Tuple[bool, str]:
-    """
-    Add a new book to the catalog. (R1)
-    """
     if not title or not title.strip():
         return False, "Title is required."
     if len(title.strip()) > 200:
@@ -63,10 +53,8 @@ def add_book_to_catalog(title: str, author: str, isbn: str, total_copies: int) -
     else:
         return False, "Database error occurred while adding the book."
 
+
 def borrow_book_by_patron(patron_id: str, book_id: int) -> Tuple[bool, str]:
-    """
-    Borrow a book. (R2)
-    """
     if not patron_id or not patron_id.isdigit() or len(patron_id) != 6:
         return False, "Invalid patron ID. Must be exactly 6 digits."
 
@@ -77,7 +65,7 @@ def borrow_book_by_patron(patron_id: str, book_id: int) -> Tuple[bool, str]:
         return False, "This book is currently not available."
 
     current_borrowed = get_patron_borrow_count(patron_id)
-    if current_borrowed >= 5:  # <=— changed from > 5
+    if current_borrowed >= 5:
         return False, "You have reached the maximum borrowing limit of 5 books."
 
     borrow_date = datetime.now()
@@ -88,12 +76,10 @@ def borrow_book_by_patron(patron_id: str, book_id: int) -> Tuple[bool, str]:
     if not update_book_availability(book_id, -1):
         return False, "Database error occurred while updating book availability."
 
-    return True, f'Successfully borrowed "{book["title"]}". Due date: {due_date.strftime("%Y-%m-%d")}.'
+    return True, f'Successfully borrowed "{book["title"]}". Due date: {due_date.strftime("%Y-%m-%d")}. '
+
 
 def return_book_by_patron(patron_id: str, book_id: int) -> Tuple[bool, str]:
-    """
-    Return a borrowed book. (R3)
-    """
     if not patron_id or not patron_id.isdigit() or len(patron_id) != 6:
         return False, "Invalid patron ID. Must be exactly 6 digits."
 
@@ -107,16 +93,11 @@ def return_book_by_patron(patron_id: str, book_id: int) -> Tuple[bool, str]:
 
     return True, "Book returned successfully."
 
+
 def calculate_late_fee_for_book(patron_id: str, book_id: int) -> Dict:
-    """
-    Calculate late fees for a specific book. (R4)
-    Currently a placeholder; implement when borrow record access is available.
-    """
-    # Validate patron id
     if not patron_id or not patron_id.isdigit() or len(patron_id) != 6:
         return {"fee_amount": 0.0, "days_overdue": 0, "status": "Invalid patron ID"}
 
-    # Look for active borrow for this patron and book
     borrowed = get_patron_borrowed_books(patron_id)
     record = next((r for r in borrowed if r.get('book_id') == book_id), None)
     if not record:
@@ -125,30 +106,24 @@ def calculate_late_fee_for_book(patron_id: str, book_id: int) -> Dict:
     due_raw = record.get('due_date')
     due = _as_date(due_raw)
     if not due:
-     return {"fee_amount": 0.0, "days_overdue": 0, "status": "No due date available"}
+        return {"fee_amount": 0.0, "days_overdue": 0, "status": "No due date available"}
 
     today = datetime.now().date()
     days_overdue = (today - due).days
-
     if days_overdue <= 0:
         return {"fee_amount": 0.0, "days_overdue": 0, "status": "OK"}
 
-    # Fee policy: $0.50 per day overdue
     fee_amount = round(days_overdue * 0.5, 2)
     return {"fee_amount": fee_amount, "days_overdue": days_overdue, "status": "OVERDUE"}
 
+
 def search_books_in_catalog(search_term: str, search_type: str) -> List[Dict]:
-    """
-    Search catalog by title/author/isbn. (R5)
-    """
     term = (search_term or "").strip().lower()
     if not term:
         return []
-
     books = get_all_books() or []
     if search_type not in {"title", "author", "isbn"}:
         search_type = "title"
-
     out = []
     for b in books:
         val = str(b.get(search_type, "")).lower()
@@ -156,11 +131,8 @@ def search_books_in_catalog(search_term: str, search_type: str) -> List[Dict]:
             out.append(b)
     return out
 
+
 def get_patron_status_report(patron_id: str) -> Dict:
-    """
-    Patron status report placeholder. (R7)
-    """
-    # Validate patron id
     if not patron_id or not patron_id.isdigit() or len(patron_id) != 6:
         return {}
 
@@ -189,3 +161,56 @@ def get_patron_status_report(patron_id: str) -> Dict:
         'overdue_count': overdue_count,
         'status': status
     }
+
+
+# --------------------------
+# Payment-related functions
+# --------------------------
+def pay_late_fees(patron_id: str, book_id: int, payment_gateway) -> Dict:
+    """Process payment for late fees for a single book.
+
+    payment_gateway must implement process_payment(amount) -> dict with keys: success (bool), transaction_id (str)
+    """
+    # Validate patron / fee
+    fee_info = calculate_late_fee_for_book(patron_id, book_id)
+    if fee_info.get('status') == 'Invalid patron ID':
+        return {'success': False, 'message': 'Invalid patron ID'}
+    amount = float(fee_info.get('fee_amount', 0.0))
+    if amount <= 0:
+        return {'success': False, 'message': 'No fees due'}
+
+    try:
+        res = payment_gateway.process_payment(amount)
+    except Exception as e:
+        return {'success': False, 'message': f'Payment gateway error: {e}'}
+
+    if not res or not res.get('success'):
+        return {'success': False, 'message': 'Payment declined'}
+
+    # on success, we could mark payment in DB (omitted) and return tx id
+    return {'success': True, 'transaction_id': res.get('transaction_id')}
+
+
+def refund_late_fee_payment(transaction_id: str, amount: float, payment_gateway) -> Dict:
+    """Request refund via payment gateway.
+
+    Validations: transaction_id non-empty, amount > 0 and <= 15
+    """
+    if not transaction_id or not isinstance(transaction_id, str):
+        return {'success': False, 'message': 'Invalid transaction ID'}
+    try:
+        amount = float(amount)
+    except Exception:
+        return {'success': False, 'message': 'Invalid amount'}
+    if amount <= 0 or amount > 15:
+        return {'success': False, 'message': 'Invalid refund amount'}
+
+    try:
+        res = payment_gateway.refund_payment(transaction_id, amount)
+    except Exception as e:
+        return {'success': False, 'message': f'Gateway error: {e}'}
+
+    if not res or not res.get('success'):
+        return {'success': False, 'message': 'Refund rejected'}
+
+    return {'success': True, 'refund_id': res.get('refund_id')}
